@@ -19,6 +19,8 @@ def get_db():
 def add_product(req: Request, data: schemas.Product, db: Session = Depends(get_db)):
     token = req.headers["Authorization"]
     if crud.verify_token(token,credentials_exception="404"):
+        if db.query(models.Product).filter(models.Product.title == data.title).first():
+            return "Product name taken"
         new_product = models.Product(title = data.title, category = data.category, description = data.description, price = data.price)
         db.add(new_product)
         db.commit()
@@ -31,6 +33,8 @@ def add_product(req: Request, data: schemas.Product, db: Session = Depends(get_d
 def add_category(req: Request, data: schemas.Category, db: Session = Depends(get_db)):
     token = req.headers["Authorization"]
     if crud.verify_token(token,credentials_exception="404"):
+        if db.query(models.Category).filter(models.Category.title == data.title).first():
+            return "Category name taken"
         new_category = models.Category(title = data.title, description = data.description, image_url = data.image_url)
         db.add(new_category)
         db.commit()
