@@ -1,11 +1,18 @@
 from sys import modules
-from fastapi import Depends, HTTPException, Request, APIRouter
+from fastapi import Depends, Request, Form, File, UploadFile , APIRouter, HTTPException
 from products import schemas
 from utilities import crud ,models
 from utilities.jwttoken import *
 from utilities.hashing import *
 from utilities.database import SessionLocal
 from sqlalchemy.orm import Session
+import boto3
+from botocore.exceptions import NoCredentialsError
+from decouple import config
+import uuid
+from cloudinary.utils import cloudinary_url
+from cloudinary.uploader import upload
+import cloudinary.api
 
 router = APIRouter()
 
@@ -60,12 +67,20 @@ def add_category(req: Request, data: schemas.Category, db: Session = Depends(get
     else:
         return HTTPException(status_code=404,detail="User not registered")
 
+
 @router.post("/api/add-image")
-def add_image(req: Request,data: schemas.Image, db: Session = Depends(get_db)):
+def add_image(req: Request,file : UploadFile = File(...), product: int = Form(...), db: Session = Depends(get_db)):
     token = req.headers["Authorization"]
     if crud.verify_token(token,credentials_exception="404"):
-        new_image = models.Image(url = data.url, product = data.product)
+        file_url = ''
+        data = file.file._file
+        cloudinary.config(cloud_name = config('CLOUD_NAME'), api_key=config('API_KEY'), 
+        api_secret=config('API_SECRET'))
+        upload_result = cloudinary.uploader.upload(data)
+        file_url = upload_result['secure_url']
+        new_image = models.Image(url = file_url, product = product)
         db.add(new_image)
         db.commit()
         db.refresh(new_image)
         return new_image
+    

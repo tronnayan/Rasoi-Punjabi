@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from utilities.database import Base
+from fastapi import UploadFile, File
 
 from utilities.models import Category
 
@@ -15,5 +16,5 @@ class Category(BaseModel):
     image_url : str 
 
 class Image(BaseModel):
-    url : str 
+    file : UploadFile = File(...)
     product : int 
