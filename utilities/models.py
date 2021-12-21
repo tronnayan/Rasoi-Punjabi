@@ -17,3 +17,26 @@ class User(Base):
     username = Column(String(200),unique=True)
     email = Column(String(200),unique=True)
     password = Column(String(200))
+
+class Category(Base):
+    __tablename__ = "category"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, unique=True)
+    description = Column(String)
+    image_url = Column(String)
+
+class Product(Base):
+    __tablename__ = "products"
+    id = Column(Integer,primary_key=True,index=True)
+    title = Column(String, unique=True)
+    category = Column(Integer, ForeignKey("category.id"))
+    description = Column(String)
+    in_stock = Column(Boolean,default=True)
+    price = Column(Integer)
+
+class Image(Base):
+    __tablename__ = "images"
+    id = Column(Integer, primary_key=True, index=True)
+    url = Column(String)
+    product = Column(Integer, ForeignKey("products.id"))
+

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from utilities import models
 from accounts import accounts
-
+from products import products
 from utilities.database import engine
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -22,3 +22,4 @@ app.add_middleware(
 )
 
 app.include_router(accounts.router)
+app.include_router(products.router)
