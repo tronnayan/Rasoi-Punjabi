@@ -53,7 +53,7 @@ def get_product(req: Request, db: Session = Depends(get_db)):
         return HTTPException(status_code=404,detail="User not registered")
 
 
-@router.post("/api/add-category")
+@router.post("/api/category")
 def add_category(req: Request, data: schemas.Category, db: Session = Depends(get_db)):
     token = req.headers["Authorization"]
     if crud.verify_token(token,credentials_exception="404"):
@@ -84,3 +84,8 @@ def add_image(req: Request,file : UploadFile = File(...), product: int = Form(..
         db.refresh(new_image)
         return new_image
     
+@router.get("/api/category")
+def show_category(req:Request, db: Session = Depends(get_db)):
+    token = req.headers["Authorization"]
+    if crud.verify_token(token,credentials_exception="404"):
+        return db.query(models.Category).all()
