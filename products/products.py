@@ -6,8 +6,6 @@ from utilities.jwttoken import *
 from utilities.hashing import *
 from utilities.database import SessionLocal
 from sqlalchemy.orm import Session
-import boto3
-from botocore.exceptions import NoCredentialsError
 from decouple import config
 import uuid
 from cloudinary.utils import cloudinary_url
