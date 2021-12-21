@@ -38,8 +38,8 @@ def get_product(req: Request, db: Session = Depends(get_db)):
     token = req.headers["Authorization"]
     if crud.verify_token(token,credentials_exception="404"):
         product_data = db.query(models.Product).all()
-        # temp = product_data.__dict__
-        # temp["images"]  = db.query(models.Image).filter(models.Image.product == product_data.id).all()
+        temp = product_data.__dict__
+        temp["images"]  = db.query(models.Image).filter(models.Image.product == product_data.id).all()
         return product_data
     else:
         return HTTPException(status_code=404,detail="User not registered")
