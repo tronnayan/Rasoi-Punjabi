@@ -1,5 +1,4 @@
 from typing import Text
-from decouple import Choices
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.elements import ColumnElement
@@ -12,8 +11,8 @@ from utilities.database import Base
 class User(Base):
     __tablename__ = "user"
     id = Column(Integer, primary_key=True, index=True)
-    first_name = Column(String,default=None)
-    last_name = Column(String,default=None)
+    first_name = Column(String,default="")
+    last_name = Column(String,default="")
     username = Column(String(200),unique=True)
     email = Column(String(200),unique=True)
     password = Column(String(200))
