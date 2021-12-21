@@ -13,3 +13,7 @@ class Category(BaseModel):
     title : str 
     description : str
     image_url : str 
+
+class Image(BaseModel):
+    url : str 
+    product : int 

@@ -1,3 +1,4 @@
+from sys import modules
 from fastapi import Depends, HTTPException, Request, APIRouter
 from products import schemas
 from utilities import crud ,models
@@ -25,9 +26,24 @@ def add_product(req: Request, data: schemas.Product, db: Session = Depends(get_d
         db.add(new_product)
         db.commit()
         db.refresh(new_product)
-        return new_product
+        temp = new_product.__dict__
+        temp["images"]  = db.query(models.Image).filter(models.Image.product == new_product.id).all()
+        return temp
     else:
         return HTTPException(status_code=404,detail="User not registered")
+
+
+@router.get("/api/product/{product_id}")
+def get_product(product_id, req: Request, db: Session = Depends(get_db)):
+    token = req.headers["Authorization"]
+    if crud.verify_token(token,credentials_exception="404"):
+        product_data = db.query(models.Product).filter(models.Product.id == product_id).first()
+        temp = product_data.__dict__
+        temp["images"]  = db.query(models.Image).filter(models.Image.product == product_data.id).all()
+        return temp
+    else:
+        return HTTPException(status_code=404,detail="User not registered")
+
 
 @router.post("/api/add-category")
 def add_category(req: Request, data: schemas.Category, db: Session = Depends(get_db)):
@@ -42,3 +58,13 @@ def add_category(req: Request, data: schemas.Category, db: Session = Depends(get
         return new_category
     else:
         return HTTPException(status_code=404,detail="User not registered")
+
+@router.post("/api/add-image")
+def add_image(req: Request,data: schemas.Image, db: Session = Depends(get_db)):
+    token = req.headers["Authorization"]
+    if crud.verify_token(token,credentials_exception="404"):
+        new_image = models.Image(url = data.url, product = data.product)
+        db.add(new_image)
+        db.commit()
+        db.refresh(new_image)
+        return new_image
