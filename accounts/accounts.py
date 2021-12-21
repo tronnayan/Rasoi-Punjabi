@@ -21,7 +21,6 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
-
     else:
         hashed_pass = Hash.bcrypt(user.password)
         db_user = models.User(username=user.username,email=user.email, password=hashed_pass)
@@ -29,6 +28,7 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(db_user)
         temp = db_user.__dict__
+        temp['detail'] = 'success'
         temp.pop("password")
         return db_user
         
@@ -41,9 +41,9 @@ def login_user(user: schemas.Login, db: Session = Depends(get_db)):
             return HTTPException(status_code=400,detail="Wrong Password")
         access_token = create_access_token(data={"sub": db_user.email })
         db_user.password = "Hidden"
-        return {"token": access_token}
+        return {"token": access_token,'detail':"success"}
     else:
-        return {"status":"User not registered"}
+        return {"detail":"User not registered"}
 
 @router.get("/api/user_detail")
 def get_user(req: Request, db: Session = Depends(get_db)):

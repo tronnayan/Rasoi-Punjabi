@@ -33,14 +33,14 @@ def add_product(req: Request, data: schemas.Product, db: Session = Depends(get_d
         return HTTPException(status_code=404,detail="User not registered")
 
 
-@router.get("/api/product/{product_id}")
-def get_product(product_id, req: Request, db: Session = Depends(get_db)):
+@router.get("/api/products")
+def get_product(req: Request, db: Session = Depends(get_db)):
     token = req.headers["Authorization"]
     if crud.verify_token(token,credentials_exception="404"):
-        product_data = db.query(models.Product).filter(models.Product.id == product_id).first()
-        temp = product_data.__dict__
-        temp["images"]  = db.query(models.Image).filter(models.Image.product == product_data.id).all()
-        return temp
+        product_data = db.query(models.Product).all()
+        # temp = product_data.__dict__
+        # temp["images"]  = db.query(models.Image).filter(models.Image.product == product_data.id).all()
+        return product_data
     else:
         return HTTPException(status_code=404,detail="User not registered")
 
