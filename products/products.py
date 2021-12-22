@@ -97,6 +97,9 @@ def fetch_all(req:Request, db: Session = Depends(get_db)):
         obj = dict()
         obj["category"] = db.query(models.Category).all()
         obj["products"] = db.query(models.Product).all()
+        for p in obj["products"]:
+            temp = p.__dict__
+            temp["images"]  = db.query(models.Image).filter(models.Image.product == p.id).all()
         return obj
 
     
