@@ -90,6 +90,17 @@ def show_category(req:Request, db: Session = Depends(get_db)):
         return db.query(models.Category).all()
 
 
+@router.get("/api/category/{category_id}")
+def get_category(category_id, req:Request, db: Session = Depends(get_db)):
+    token = req.headers["Authorization"]
+    if crud.verify_token(token,credentials_exception="404"):
+        data =  db.query(models.Product).filter(models.Product.category == category_id).all()
+        for i in data :
+            temp = i.__dict__
+            temp["images"] = db.query(models.Image).filter(models.Image.product == i.id).all() 
+        return data
+
+
 @router.get("/api/dashboard")
 def fetch_all(req:Request, db: Session = Depends(get_db)):
     token = req.headers["Authorization"]
