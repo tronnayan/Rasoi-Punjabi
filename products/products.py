@@ -1,5 +1,6 @@
 from sys import modules
 from fastapi import Depends, Request, Form, File, UploadFile , APIRouter, HTTPException
+from sqlalchemy.orm.session import SessionTransaction
 from products import schemas
 from utilities import crud ,models
 from utilities.jwttoken import *
@@ -87,3 +88,15 @@ def show_category(req:Request, db: Session = Depends(get_db)):
     token = req.headers["Authorization"]
     if crud.verify_token(token,credentials_exception="404"):
         return db.query(models.Category).all()
+
+
+@router.get("/api/dashboard")
+def fetch_all(req:Request, db: Session = Depends(get_db)):
+    token = req.headers["Authorization"]
+    if crud.verify_token(token, credentials_exception="404"):
+        obj = dict()
+        obj["category"] = db.query(models.Category).all()
+        obj["products"] = db.query(models.Product).all()
+        return obj
+
+    
