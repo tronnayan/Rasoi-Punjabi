@@ -1,3 +1,4 @@
+from enum import IntEnum
 from typing import Text
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
@@ -34,3 +35,17 @@ class Product(Base):
     image_url = Column(String)
     quantity = Column(String)
     price = Column(Integer)
+
+class FeatureProduct(Base):
+    __tablename__ = "featureproducts"
+    id = Column(Integer, primary_key=True,index=True)
+    product = Column(Integer,ForeignKey("products.id"))
+    image_url = Column(String)
+
+class Cart(Base):
+    __tablename__ = "cart"
+    id = Column(Integer, primary_key=True,index=True)
+    user = Column(Integer,ForeignKey("user.id"))
+    quantity = Column(Integer)
+    product = Column(Integer,ForeignKey("products.id"))
+

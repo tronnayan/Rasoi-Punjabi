@@ -106,6 +106,24 @@ def fetch_all(req:Request, db: Session = Depends(get_db)):
         obj = dict()
         obj["category"] = db.query(models.Category).all()
         obj["products"] = db.query(models.Product).all()
+        obj["feature"] = db.query(models.FeatureProduct).all()
         return obj
 
-    
+
+@router.post("/api/feature-product")
+def add_feature_product(req:Request,image : UploadFile = File(...), product : int = Form(...), db:Session = Depends(get_db)):
+    token = req.headers["Authorization"]
+    if crud.verify_token(token,credentials_exception="404"):
+        file_url = ''
+        data = image.file._file
+        cloudinary.config(cloud_name = config('CLOUD_NAME'), api_key=config('API_KEY'), 
+        api_secret=config('API_SECRET'))
+        upload_result = cloudinary.uploader.upload(data)
+        file_url = upload_result['secure_url']
+        new_fproduct = models.FeatureProduct(product = product, image_url = file_url)
+        db.add(new_fproduct)
+        db.commit()
+        db.refresh(new_fproduct)
+        return new_fproduct
+    else:
+        return HTTPException(status_code=404,detail="User not registered")
