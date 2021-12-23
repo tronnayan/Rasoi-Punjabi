@@ -64,9 +64,9 @@ def update_image(product_id, req: Request, image : UploadFile = File(...), title
         api_secret=config('API_SECRET'))
         upload_result = cloudinary.uploader.upload(data)
         file_url = upload_result['secure_url']
-        db.query(models.Product).filter(models.Product == product_id).update({models.Product.title:title, models.Product.description:description,models.Product.price:price, models.Product.image_url:file_url,models.Product.category:category,models.Product.quantity:quantity})
+        db.query(models.Product).filter(models.Product.id == product_id).update({models.Product.title:title, models.Product.description:description,models.Product.price:price, models.Product.image_url:file_url,models.Product.category:category,models.Product.quantity:quantity})
         db.commit()
-        return db.query(models.Product).filter(models.Product == product_id).first()
+        return db.query(models.Product).filter(models.Product.id == product_id).first()
     else:
         return HTTPException(status_code=404,detail="User not registered")
 
