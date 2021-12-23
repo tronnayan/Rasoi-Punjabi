@@ -1,6 +1,7 @@
 from sys import modules
 from fastapi import Depends, Request, Form, File, UploadFile , APIRouter, HTTPException
 from sqlalchemy.orm.session import SessionTransaction
+from sqlalchemy.sql.functions import mode
 from products import schemas
 from utilities import crud ,models
 from utilities.jwttoken import *
@@ -53,6 +54,21 @@ def get_product(req: Request, db: Session = Depends(get_db)):
     else:
         return HTTPException(status_code=404,detail="User not registered")
 
+@router.put("/api/products/{product_id}")
+def update_image(product_id, req: Request, image : UploadFile = File(...), title: str = Form(...),category: int = Form(...),description: str = Form(...), price: str = Form(...), quantity: str = Form(...),db: Session = Depends(get_db)):
+    token = req.headers["Authorization"]
+    if crud.verify_token(token,credentials_exception="404"):
+        file_url = ''
+        data = image.file._file
+        cloudinary.config(cloud_name = config('CLOUD_NAME'), api_key=config('API_KEY'), 
+        api_secret=config('API_SECRET'))
+        upload_result = cloudinary.uploader.upload(data)
+        file_url = upload_result['secure_url']
+        db.query(models.Product).filter(models.Product == product_id).update({models.Product.title:title, models.Product.description:description,models.Product.price:price, models.Product.image_url:file_url,models.Product.category:category,models.Product.quantity:quantity})
+        db.commit()
+        return db.query(models.Product).filter(models.Product == product_id).first()
+    else:
+        return HTTPException(status_code=404,detail="User not registered")
 
 @router.post("/api/category")
 def add_category(req: Request, data: schemas.Category, db: Session = Depends(get_db)):
