@@ -9,6 +9,8 @@ class Product(BaseModel):
     category : int 
     description : str 
     price : int 
+    image : UploadFile = File(...)
+    quantity : str
 
 class Category(BaseModel):
     title : str 

@@ -31,11 +31,6 @@ class Product(Base):
     category = Column(Integer, ForeignKey("category.id"))
     description = Column(String)
     in_stock = Column(Boolean,default=True)
+    image_url = Column(String)
+    quantity = Column(String)
     price = Column(Integer)
-
-class Image(Base):
-    __tablename__ = "images"
-    id = Column(Integer, primary_key=True, index=True)
-    url = Column(String)
-    product = Column(Integer, ForeignKey("products.id"))
-

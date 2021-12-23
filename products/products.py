@@ -23,18 +23,23 @@ def get_db():
         db.close()
 
 @router.post("/api/add-product")
-def add_product(req: Request, data: schemas.Product, db: Session = Depends(get_db)):
+def add_product(req: Request, image : UploadFile = File(...), title: str = Form(...),category: int = Form(...),description: str = Form(...), price: str = Form(...), quantity: str = Form(...),db: Session = Depends(get_db)):
     token = req.headers["Authorization"]
     if crud.verify_token(token,credentials_exception="404"):
-        if db.query(models.Product).filter(models.Product.title == data.title).first():
+        if db.query(models.Product).filter(models.Product.title == title).first():
             return "Product name taken"
-        new_product = models.Product(title = data.title, category = data.category, description = data.description, price = data.price)
+
+        file_url = ''
+        data = image.file._file
+        cloudinary.config(cloud_name = config('CLOUD_NAME'), api_key=config('API_KEY'), 
+        api_secret=config('API_SECRET'))
+        upload_result = cloudinary.uploader.upload(data)
+        file_url = upload_result['secure_url']
+        new_product = models.Product(title = title, category = category, description = description, price = price, quantity = quantity, image_url = file_url)
         db.add(new_product)
         db.commit()
         db.refresh(new_product)
-        temp = new_product.__dict__
-        temp["images"]  = db.query(models.Image).filter(models.Image.product == new_product.id).all()
-        return temp
+        return new_product
     else:
         return HTTPException(status_code=404,detail="User not registered")
 
@@ -44,9 +49,6 @@ def get_product(req: Request, db: Session = Depends(get_db)):
     token = req.headers["Authorization"]
     if crud.verify_token(token,credentials_exception="404"):
         product_data = db.query(models.Product).all()
-        for p in product_data:
-            temp = p.__dict__
-            temp["images"]  = db.query(models.Image).filter(models.Image.product == p.id).all()
         return product_data
     else:
         return HTTPException(status_code=404,detail="User not registered")
@@ -66,23 +68,6 @@ def add_category(req: Request, data: schemas.Category, db: Session = Depends(get
     else:
         return HTTPException(status_code=404,detail="User not registered")
 
-
-@router.post("/api/add-image")
-def add_image(req: Request,file : UploadFile = File(...), product: int = Form(...), db: Session = Depends(get_db)):
-    token = req.headers["Authorization"]
-    if crud.verify_token(token,credentials_exception="404"):
-        file_url = ''
-        data = file.file._file
-        cloudinary.config(cloud_name = config('CLOUD_NAME'), api_key=config('API_KEY'), 
-        api_secret=config('API_SECRET'))
-        upload_result = cloudinary.uploader.upload(data)
-        file_url = upload_result['secure_url']
-        new_image = models.Image(url = file_url, product = product)
-        db.add(new_image)
-        db.commit()
-        db.refresh(new_image)
-        return new_image
-    
 @router.get("/api/category")
 def show_category(req:Request, db: Session = Depends(get_db)):
     token = req.headers["Authorization"]
@@ -108,9 +93,6 @@ def fetch_all(req:Request, db: Session = Depends(get_db)):
         obj = dict()
         obj["category"] = db.query(models.Category).all()
         obj["products"] = db.query(models.Product).all()
-        for p in obj["products"]:
-            temp = p.__dict__
-            temp["images"]  = db.query(models.Image).filter(models.Image.product == p.id).all()
         return obj
 
     
