@@ -127,3 +127,4 @@ def add_feature_product(req:Request,image : UploadFile = File(...), product : in
         return new_fproduct
     else:
         return HTTPException(status_code=404,detail="User not registered")
+

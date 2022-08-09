@@ -20,3 +20,6 @@ class Category(BaseModel):
 class Image(BaseModel):
     file : UploadFile = File(...)
     product : int 
+
+class Cart(Base):
+    
